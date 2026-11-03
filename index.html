@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Núcleo Kokón — Prototipo Demo Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mauve:#6B4F5A; --mauve-dark:#4A3340; --mauve-light:#9C7A88; --mauve-pale:#F0E8EC;
+  --teal:#1A8C8A; --teal-dark:#0F5E5D; --teal-light:#B1CCCB; --teal-pale:#E8F4F4;
+  --blush:#C49A8A; --amber:#D4956A; --cream:#F7F2EE; --cream-dark:#EDE5DE;
+  --white:#FFFFFF; --dark:#1E1818; --mid:#4A3D40; --muted:#8A7A80;
+  --border:rgba(107,79,90,0.14);
+  --shadow-sm:0 2px 12px rgba(107,79,90,0.10); --shadow-md:0 6px 32px rgba(107,79,90,0.14);
+  --radius:20px; --radius-sm:14px;
+  --sem-atencion:#B65B45; --sem-construccion:#D4956A; --sem-sostenimiento:#1A8C8A; --sem-autonomia:#4A3340;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Montserrat',sans-serif;background:var(--cream);color:var(--dark);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer}
+ul{list-style:none}
+
+.demo-banner{background:var(--mauve-dark);color:rgba(255,255,255,.85);font-size:11.5px;text-align:center;padding:7px 16px;letter-spacing:.02em}
+.demo-banner strong{color:var(--teal-light)}
+
+.app-shell{min-height:calc(100vh - 31px);display:grid;grid-template-columns:260px 1fr}
+
+/* SIDEBAR */
+.sidebar{background:var(--mauve);position:relative;overflow:hidden;display:flex;flex-direction:column;padding:28px 20px}
+.sb-circle{position:absolute;border-radius:50%;pointer-events:none}
+.sb-circle:nth-child(1){top:-30%;right:-40%;width:420px;height:420px;border:1px solid rgba(177,204,203,.10)}
+.sb-circle:nth-child(2){bottom:-25%;left:-35%;width:360px;height:360px;border:1px solid rgba(177,204,203,.08)}
+.sb-logo{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:4px 8px 24px}
+.sb-logo svg{height:34px;width:auto;color:#fff}
+.sb-logo-text{display:flex;flex-direction:column;line-height:1.1}
+.sb-logo-n{font-size:8.5px;color:rgba(255,255,255,.55);letter-spacing:.14em;text-transform:uppercase}
+.sb-logo-k{font-size:15px;font-weight:700;color:#fff;letter-spacing:.18em;text-transform:uppercase}
+.sb-nav{position:relative;z-index:2;display:flex;flex-direction:column;gap:2px;flex:1}
+.sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:500;color:rgba(255,255,255,.68);transition:all .18s;border:none;background:none;width:100%;text-align:left}
+.sb-link svg{flex-shrink:0;opacity:.85}
+.sb-link:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.92)}
+.sb-link.active{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(15,94,93,.35)}
+.sb-cycle{position:relative;z-index:2;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.14);border-radius:var(--radius-sm);padding:14px 16px;margin-top:16px}
+.sb-cycle-label{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-light)}
+.sb-cycle-name{font-size:15px;font-weight:300;color:#fff;margin:4px 0 10px}
+.sb-cycle-name strong{font-weight:700}
+.cycle-track{display:flex;gap:4px}
+.cycle-track span{height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,.18)}
+.cycle-track span.done{background:var(--teal-light);opacity:.55}
+.cycle-track span.current{background:var(--teal-light);opacity:1}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 36px;border-bottom:.5px solid var(--border);background:var(--cream);gap:12px;flex-wrap:wrap}
+.greet-eyebrow{font-size:11px;color:var(--muted);font-weight:500}
+.greet-name{font-size:22px;font-weight:300}
+.greet-name strong{font-weight:700}
+.topbar-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.plan-badge{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--teal-pale);color:var(--teal-dark);border:1px solid rgba(26,140,138,.25)}
+.btn-tour{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:30px;border:none;background:var(--mauve);color:#fff;font-size:12px;font-weight:600;letter-spacing:.03em;transition:all .2s}
+.btn-tour:hover{background:var(--mauve-dark);transform:translateY(-1px)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+
+.content{flex:1;padding:30px 36px 90px;overflow-y:auto}
+.view{display:none;max-width:1000px}
+.view.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:8px}
+.title{font-size:28px;font-weight:300;margin-bottom:6px}
+.title strong{font-weight:700}
+.sub{font-size:13.5px;color:var(--muted);margin-bottom:24px;max-width:620px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm)}
+.stack>.card+.card,.stack>*+*{margin-top:18px}
+.card-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.card-head svg{color:var(--teal);flex-shrink:0}
+.card-head span{font-size:13px;font-weight:600;color:var(--mid)}
+.card-head .right{margin-left:auto;font-weight:500;font-size:11.5px;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* Frase ancla */
+.anchor{background:linear-gradient(135deg,var(--mauve) 0%,var(--mauve-dark) 100%);border:none;color:#fff;position:relative;overflow:hidden}
+.anchor::after{content:"";position:absolute;top:-40%;right:-10%;width:260px;height:260px;border:1px solid rgba(177,204,203,.18);border-radius:50%}
+.anchor .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-light);font-weight:600;margin-bottom:8px}
+.anchor q{display:block;font-size:19px;font-weight:300;font-style:italic;line-height:1.45;quotes:none;position:relative;z-index:2}
+
+/* Check-in */
+.ci-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ci-field{background:var(--cream);border-radius:var(--radius-sm);padding:12px}
+.ci-label{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:500}
+.ci-opts{display:flex;gap:6px}
+.ci-opt{flex:1;padding:8px 4px;border-radius:10px;font-size:11px;text-align:center;text-transform:capitalize;background:#fff;border:1px solid var(--border);color:var(--mid);transition:all .15s}
+.ci-opt:hover{border-color:var(--teal)}
+.ci-opt.selected{background:var(--teal);border-color:var(--teal);color:#fff}
+.ci-msg{margin-top:12px;font-size:12.5px;color:var(--teal-dark);min-height:20px}
+
+/* listas */
+.row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;font-size:13.5px;border-bottom:1px solid var(--cream-dark);gap:10px}
+.row:last-child{border-bottom:none}
+.row .time{color:var(--muted);font-size:12px;white-space:nowrap}
+.check-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13.5px;cursor:pointer;user-select:none}
+.chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:#fff}
+.chk svg{opacity:0;transform:scale(.6);transition:all .15s}
+.check-row.done .chk{background:var(--teal);border-color:var(--teal)}
+.check-row.done .chk svg{opacity:1;transform:none}
+.check-row.done .lbl-t{color:var(--muted);text-decoration:line-through}
+.prio-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-right:4px}
+
+.reco{background:var(--mauve-pale);border:1px solid rgba(107,79,90,.16)}
+.reco .card-head svg{color:var(--amber)}
+.reco p{font-size:13.5px;color:var(--mid)}
+.reco .why{font-size:11.5px;color:var(--muted);margin-top:8px}
+
+/* Bitácora */
+.timeline{position:relative;padding-left:26px}
+.timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:18px}
+.tl-dot{position:absolute;left:-26px;top:24px;width:13px;height:13px;border-radius:50%;background:var(--cream);border:2px solid var(--teal)}
+.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.tl-tema{font-size:16px;font-weight:600;color:var(--mauve-dark)}
+.tl-fecha{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.tl-item p{font-size:13.5px;margin-bottom:4px}
+.tl-item p span{color:var(--muted)}
+.tl-add textarea,.field-area{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-family:inherit;font-size:13.5px;outline:none;resize:vertical;min-height:70px;background:#fff;color:var(--dark)}
+.tl-add textarea:focus,.field-area:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,140,138,.12)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--teal);color:#fff;border-radius:30px;font-size:12.5px;font-weight:600;border:none;transition:all .2s;letter-spacing:.03em}
+.btn:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,140,138,.3)}
+.btn.ghost{background:#fff;color:var(--mid);border:1.5px solid var(--border)}
+.btn.ghost:hover{background:var(--mauve-pale);box-shadow:none}
+.btn.sm{padding:7px 16px;font-size:11.5px}
+
+/* Progreso */
+.prog-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:flex-start}
+.pill{font-size:10.5px;font-weight:600;padding:4px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.dim{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:10px;gap:10px}
+.dim .nm{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.dim .val{font-size:12px;color:var(--muted);margin-right:8px}
+.is-box{display:flex;align-items:center;gap:18px}
+.is-num{font-size:44px;font-weight:300;color:var(--mauve-dark);line-height:1}
+.is-num small{font-size:14px;color:var(--muted)}
+.is-txt{font-size:12.5px;color:var(--muted);max-width:260px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.route{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.route-step{padding:12px 10px;border-radius:var(--radius-sm);background:var(--cream);border:1px solid var(--border);text-align:center}
+.route-step .n{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted)}
+.route-step .t{font-size:12.5px;font-weight:600;color:var(--mid);margin-top:2px}
+.route-step.done{background:var(--teal-pale);border-color:rgba(26,140,138,.2)}
+.route-step.done .t{color:var(--teal-dark)}
+.route-step.current{background:var(--teal);border-color:var(--teal)}
+.route-step.current .n,.route-step.current .t{color:#fff}
+
+/* Herramientas */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tool{position:relative}
+.tool.locked{opacity:.8;background:rgba(255,255,255,.7)}
+.tool-name{font-size:16px;font-weight:600;color:var(--mauve-dark);margin-bottom:4px;padding-right:30px}
+.tool-crit{font-size:12px;color:var(--muted);margin-bottom:12px}
+.tool-ic{position:absolute;top:20px;right:20px;color:var(--muted)}
+.tool.unlocked .tool-ic{color:var(--teal)}
+.panel{margin-top:18px;border:1.5px solid var(--teal);animation:fadeIn .25s ease}
+.pomo-time{font-size:56px;font-weight:300;color:var(--mauve-dark);letter-spacing:.02em;text-align:center;line-height:1.1}
+.pomo-mode{text-align:center;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:6px}
+.pomo-actions{display:flex;gap:10px;justify-content:center;margin:16px 0 8px}
+.pomo-log{font-size:12.5px;color:var(--muted);text-align:center}
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mx{border-radius:var(--radius-sm);padding:14px;font-size:12.5px;background:var(--cream);border:1px solid var(--border)}
+.mx h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--mauve-dark)}
+.mx.hi{background:var(--teal-pale);border-color:rgba(26,140,138,.25)}
+.cal-week{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cal-day{background:var(--cream);border-radius:12px;padding:10px;font-size:11.5px;min-height:110px}
+.cal-day b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mauve-dark);margin-bottom:6px}
+.cal-ev{background:#fff;border-left:3px solid var(--teal);padding:3px 7px;margin-bottom:5px;border-radius:4px}
+.cal-ev.rest{border-left-color:var(--amber)}
+
+/* Materiales */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{padding:7px 16px;border-radius:30px;font-size:12px;font-weight:500;background:#fff;border:1px solid var(--border);color:var(--mid);transition:all .15s}
+.chip.active{background:var(--mauve);border-color:var(--mauve);color:#fff}
+.mat{display:flex;flex-direction:column;gap:8px}
+.mat-type{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-dark)}
+.mat-title{font-size:15px;font-weight:600;color:var(--mauve-dark);line-height:1.35}
+.mat-meta{font-size:12px;color:var(--muted)}
+.mat-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px}
+.plan-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;letter-spacing:.06em;text-transform:uppercase}
+.plan-tag.free{background:var(--teal-pale);color:var(--teal-dark)}
+.plan-tag.base{background:var(--mauve-pale);color:var(--mauve-dark)}
+.mat.locked{background:linear-gradient(180deg,#fff,var(--cream))}
+.mat.locked .mat-title{color:var(--muted)}
+
+/* Acompañamiento */
+.sess-hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.sess-date{background:var(--mauve);color:#fff;border-radius:var(--radius-sm);padding:12px 18px;text-align:center;min-width:80px}
+.sess-date b{display:block;font-size:26px;font-weight:300;line-height:1}
+.sess-date span{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-light)}
+.sess-info{flex:1;min-width:200px}
+.sess-info h3{font-size:16px;font-weight:600;color:var(--mauve-dark)}
+.sess-info p{font-size:12.5px;color:var(--muted)}
+.priv{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+
+/* Comunidad */
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.post-av{width:32px;height:32px;border-radius:50%;background:var(--mauve-light);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.post-who{font-size:13px;font-weight:600}
+.post-when{font-size:11px;color:var(--muted)}
+.post-body{font-size:13.5px;color:var(--mid);margin-bottom:12px}
+.post-actions{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.post-actions button{background:none;border:none;color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:5px}
+.post-actions button:hover{color:var(--teal-dark)}
+.post-actions button.on{color:var(--teal-dark);font-weight:600}
+.cat-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-left:auto}
+
+/* NKI */
+.chat{display:flex;flex-direction:column;height:380px}
+.chat-log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 10px}
+.msg{max-width:82%;padding:11px 15px;border-radius:16px;font-size:13.5px;line-height:1.55}
+.msg.bot{background:var(--mauve-pale);color:var(--mid);border-bottom-left-radius:4px;align-self:flex-start}
+.msg.user{background:var(--teal);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.chat-quick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.quick{padding:6px 13px;border-radius:20px;font-size:11.5px;background:#fff;border:1px solid var(--border);color:var(--mid)}
+.quick:hover{border-color:var(--teal);color:var(--teal-dark)}
+.chat-form{display:flex;gap:10px}
+.chat-form input{flex:1;border:1.5px solid var(--border);border-radius:30px;padding:11px 18px;font-family:inherit;font-size:13.5px;outline:none}
+.chat-form input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,140,138,.12)}
+.online{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:6px}
+.limits{font-size:11.5px;color:var(--muted);line-height:1.6}
+.limits b{color:var(--mid)}
+
+.disclaimer{margin-top:34px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;max-width:760px}
+
+/* Toast y tour */
+.toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,20px);background:var(--mauve-dark);color:#fff;padding:11px 22px;border-radius:30px;font-size:12.5px;opacity:0;pointer-events:none;transition:all .25s;z-index:500;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.tour-bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--mauve-dark);color:#fff;border-radius:20px;padding:14px 20px;display:none;align-items:center;gap:18px;z-index:400;box-shadow:var(--shadow-md);max-width:min(720px,94vw);border:1px solid rgba(177,204,203,.3)}
+.tour-bar.show{display:flex}
+.tour-step{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--teal-light);text-transform:uppercase}
+.tour-cap{font-size:13px;line-height:1.5;flex:1}
+.tour-btns{display:flex;gap:8px;flex-shrink:0}
+.tour-btns button{padding:8px 16px;border-radius:20px;border:none;font-size:12px;font-weight:600}
+.tour-next{background:var(--teal);color:#fff}
+.tour-exit{background:rgba(255,255,255,.12);color:#fff}
+
+/* Mobile */
+.m-top{display:none}
+.overlay{display:none;position:fixed;inset:0;background:rgba(30,24,24,.35);z-index:150}
+.overlay.show{display:block}
+@media (max-width:900px){
+  .app-shell{grid-template-columns:1fr}
+  .sidebar{position:fixed;inset:0 auto 0 0;width:260px;z-index:200;transform:translateX(-100%);transition:transform .25s}
+  .sidebar.open{transform:none;box-shadow:var(--shadow-md)}
+  .m-top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--mauve);position:sticky;top:0;z-index:100;color:#fff}
+  .m-top b{letter-spacing:.18em;font-size:13px;text-transform:uppercase}
+  .m-top button{background:none;border:none;color:#fff}
+  .topbar{padding:16px 20px}
+  .content{padding:22px 20px 110px}
+  .grid-2,.grid-3,.prog-grid,.tool-grid,.ci-grid,.matrix{grid-template-columns:1fr}
+  .route{grid-template-columns:repeat(5,1fr);gap:6px}
+  .route-step{padding:10px 4px}
+  .route-step .t{font-size:10.5px}
+  .cal-week{grid-template-columns:1fr 1fr}
+  .tour-bar{flex-direction:column;align-items:stretch;gap:10px}
+  .tour-btns{justify-content:flex-end}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-banner"><strong>Prototipo Demo Day</strong> · Perfil de ejemplo y datos simulados. Ninguna información se envía a un servidor.</div>
+
+<div class="m-top">
+  <b>Núcleo Kokón</b>
+  <button id="menuBtn" aria-label="Menú"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="app-shell">
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-circle"></div><div class="sb-circle"></div>
+  <div class="sb-logo">
+    <svg viewBox="0 0 256 256"><circle cx="128" cy="128" r="90" fill="none" stroke="currentColor" stroke-width="14"/><path d="M128 182c-14 0-24-10-24-26V92c0-12 8-20 18-22l10-3c10 6 22 8 34 4-8 8-18 8-30 4 14 4 20 12 20 26 0 12-6 22-6 40 0 14-8 26-22 41z" fill="currentColor"/></svg>
+    <div class="sb-logo-text"><span class="sb-logo-n">Núcleo</span><span class="sb-logo-k">Kokón</span></div>
+  </div>
+  <nav class="sb-nav" id="nav">
+    <button class="sb-link active" data-view="hoy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Inicio / Hoy</button>
+    <button class="sb-link" data-view="bitacora"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Bitácora</button>
+    <button class="sb-link" data-view="progreso"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Progreso</button>
+    <button class="sb-link" data-view="herramientas"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Herramientas</button>
+    <button class="sb-link" data-view="materiales"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Materiales</button>
+    <button class="sb-link" data-view="acompanamiento"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Acompañamiento</button>
+    <button class="sb-link" data-view="comunidad"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Comunidad</button>
+    <button class="sb-link" data-view="nki"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>NK Intelligence</button>
+  </nav>
+  <div class="sb-cycle">
+    <div class="sb-cycle-label">Ciclo actual</div>
+    <div class="sb-cycle-name">II · <strong>Estabilizar</strong></div>
+    <div class="cycle-track"><span class="done"></span><span class="current"></span><span></span><span></span><span></span></div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="greet-eyebrow">Hola,</div>
+      <div class="greet-name"><strong>Renata</strong> <span style="font-size:11px;color:var(--muted);font-weight:400">· perfil de ejemplo</span></div>
+    </div>
+    <div class="topbar-actions">
+      <span class="plan-badge">Plan Base</span>
+      <button class="btn-tour" id="tourBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Recorrido demo</button>
+      <div class="avatar">R</div>
+    </div>
+  </header>
+
+<main class="content">
+
+<!-- ================= HOY ================= -->
+<section class="view active" id="view-hoy">
+  <span class="eyebrow">Tu día</span>
+  <h1 class="title">Inicio</h1>
+  <p class="sub">¿Qué necesitas saber y hacer hoy para sostener tu sistema?</p>
+  <div class="stack">
+    <div class="card anchor">
+      <div class="lbl">Frase ancla</div>
+      <q>No tienes que sostenerlo todo. Solo lo que hoy te corresponde.</q>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Check-in diario</span><span class="right">Alimenta tu Índice de Sostenibilidad</span>
+      </div>
+      <div class="ci-grid">
+        <div class="ci-field"><div class="ci-label">🫀 Estado corporal</div>
+          <div class="ci-opts" data-g="corporal"><button class="ci-opt" data-v="tenso">tenso</button><button class="ci-opt" data-v="neutro">neutro</button><button class="ci-opt" data-v="ligero">ligero</button></div></div>
+        <div class="ci-field"><div class="ci-label">💭 Estado emocional</div>
+          <div class="ci-opts" data-g="emocional"><button class="ci-opt" data-v="bajo">bajo</button><button class="ci-opt" data-v="medio">medio</button><button class="ci-opt" data-v="alto">alto</button></div></div>
+        <div class="ci-field"><div class="ci-label">⚡ Energía</div>
+          <div class="ci-opts" data-g="energia"><button class="ci-opt" data-v="bajo">bajo</button><button class="ci-opt" data-v="medio">medio</button><button class="ci-opt" data-v="alto">alto</button></div></div>
+      </div>
+      <div class="ci-msg" id="ciMsg">Elige cómo llegas hoy. No hay respuestas correctas.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>
+        <span>Prioridades de hoy</span><span class="right" id="prioCount">0 de 3</span>
+      </div>
+      <div id="prioList"></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px">
+      <div class="card">
+        <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Agenda de hoy</span></div>
+        <div class="row"><span>Bloque de trabajo — propuesta para Fundación X</span><span class="time">09:30</span></div>
+        <div class="row"><span>Pausa corporal (10 min)</span><span class="time">11:15</span></div>
+        <div class="row"><span>Sesión de mentoría</span><span class="time">17:00</span></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Hábitos de hoy</span><span class="right" id="habCount">0 de 3</span></div>
+        <div id="habList"></div>
+      </div>
+    </div>
+
+    <div class="card reco" style="margin-top:18px">
+      <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg><span>Recomendación de NK Intelligence</span></div>
+      <p id="recoText"></p>
+      <div class="why" id="recoWhy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BITÁCORA ================= -->
+<section class="view" id="view-bitacora">
+  <span class="eyebrow">Memoria del proceso</span>
+  <h1 class="title">Bitácora</h1>
+  <p class="sub">Registro longitudinal del acompañamiento: sesiones, avances, bloqueos y decisiones. Tú conservas el control de tus datos.</p>
+  <div class="card tl-add" style="margin-bottom:22px">
+    <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Agregar una reflexión</span></div>
+    <textarea id="bitInput" placeholder="¿Qué observaste hoy en tu sistema? Un bloqueo, un avance, una decisión…"></textarea>
+    <div style="margin-top:10px"><button class="btn sm" id="bitBtn">Guardar en mi bitácora</button></div>
+  </div>
+  <div class="timeline" id="timeline">
+    <div class="tl-item"><span class="tl-dot"></span><div class="card">
+      <div class="tl-top"><span class="tl-tema">Sobrecarga de tareas administrativas</span><span class="tl-fecha">12 oct</span></div>
+      <p><span>Llegada: </span>Llegó cansada, con la agenda saturada.</p>
+      <p><span>Avance: </span>Registró por primera vez su calendario real frente al planeado.</p>
+      <p><span>Próxima sesión: </span>Observar patrón de sueño durante 5 días.</p></div></div>
+    <div class="tl-item"><span class="tl-dot"></span><div class="card">
+      <div class="tl-top"><span class="tl-tema">Diagnóstico psico-operativo inicial</span><span class="tl-fecha">5 oct</span></div>
+      <p><span>Llegada: </span>Con claridad sobre su proyecto, pero dispersa en el día a día.</p>
+      <p><span>Avance: </span>Se construyó el Mapa de Sostenibilidad Individual.</p>
+      <p><span>Próxima sesión: </span>Priorizar 3 hábitos biológicos mínimos.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= PROGRESO ================= -->
+<section class="view" id="view-progreso">
+  <span class="eyebrow">Índice de Sostenibilidad</span>
+  <h1 class="title">Progreso</h1>
+  <p class="sub">No es una racha de días: es la evolución de tu sistema, dimensión por dimensión. Cambia tu check-in, tus hábitos o tus prioridades en Inicio y observa cómo responde.</p>
+  <div class="prog-grid">
+    <div class="card">
+      <div class="card-head"><span>Maslow Operativo</span></div>
+      <svg id="radar" viewBox="0 0 320 300" width="100%" height="300"></svg>
+      <div class="legend">
+        <span><i style="background:#B65B45"></i>Atención</span>
+        <span><i style="background:#D4956A"></i>Construcción</span>
+        <span><i style="background:#1A8C8A"></i>Sostenimiento</span>
+        <span><i style="background:#4A3340"></i>Autonomía</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="is-box"><div class="is-num" id="isNum">0<small>/100</small></div>
+        <div class="is-txt">Índice de Sostenibilidad. No es una calificación sobre ti: sirve para abrir la conversación de seguimiento.</div></div>
+      </div>
+      <div id="dimList"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="card-head"><span>Ruta metodológica</span><span class="right">Los ciclos no son etapas cronológicas</span></div>
+    <div class="route">
+      <div class="route-step done"><div class="n">I</div><div class="t">Diagnosticar</div></div>
+      <div class="route-step current"><div class="n">II</div><div class="t">Estabilizar</div></div>
+      <div class="route-step"><div class="n">III</div><div class="t">Estructurar</div></div>
+      <div class="route-step"><div class="n">IV</div><div class="t">Consolidar</div></div>
+      <div class="route-step"><div class="n">V</div><div class="t">Autonomizar</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HERRAMIENTAS ================= -->
+<section class="view" id="view-herramientas">
+  <span class="eyebrow">Andamiaje pedagógico</span>
+  <h1 class="title">Herramientas</h1>
+  <p class="sub">No se entrega todo desde el inicio: cada herramienta se desbloquea cuando el diagnóstico la justifica. Prueba "Simular diagnóstico" para verlo.</p>
+  <div class="tool-grid" id="toolGrid"></div>
+  <div id="toolPanel"></div>
+</section>
+
+<!-- ================= MATERIALES ================= -->
+<section class="view" id="view-materiales">
+  <span class="eyebrow">Biblioteca</span>
+  <h1 class="title">Materiales</h1>
+  <p class="sub">Clases, masterclasses y recursos curados según tu ciclo y diagnóstico. Acceso freemium: los contenidos Base se muestran bloqueados en el plan gratuito.</p>
+  <div class="chips" id="matChips">
+    <button class="chip active" data-c="todos">Todos</button>
+    <button class="chip" data-c="Bienestar">Bienestar</button>
+    <button class="chip" data-c="Gestión del tiempo">Gestión del tiempo</button>
+    <button class="chip" data-c="Freelance">Freelance</button>
+  </div>
+  <div class="grid-3" id="matGrid"></div>
+</section>
+
+<!-- ================= ACOMPAÑAMIENTO ================= -->
+<section class="view" id="view-acompanamiento">
+  <span class="eyebrow">Mentoría</span>
+  <h1 class="title">Acompañamiento</h1>
+  <p class="sub">Sesiones, objetivos y documentos compartidos con tu facilitadora. Las notas solo son visibles para ti y para ella.</p>
+  <div class="stack">
+    <div class="card">
+      <div class="sess-hero">
+        <div class="sess-date"><b>Hoy</b><span>17:00</span></div>
+        <div class="sess-info"><h3>Sesión de mentoría psico-operativa</h3><p>Facilitadora Kokón · 50 min · Videollamada</p></div>
+        <button class="btn" id="joinBtn">Entrar a la sesión</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg><span>Objetivos que quiero llevar a la sesión</span></div>
+      <textarea class="field-area" id="sessGoals">1. Revisar mi patrón de sueño de los últimos 5 días.
+2. Decidir qué pendiente puedo soltar esta semana.</textarea>
+      <div class="priv">🔒 Visible solo para ti y tu facilitadora</div>
+    </div>
+    <div class="grid-2" style="margin-top:18px">
+      <div class="card">
+        <div class="card-head"><span>Historial de sesiones</span></div>
+        <div class="row"><span>12 oct · Sobrecarga administrativa</span><span class="time">Completada</span></div>
+        <div class="row"><span>5 oct · Diagnóstico inicial</span><span class="time">Completada</span></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span>Documentos compartidos</span></div>
+        <div class="row"><span>Mapa de Sostenibilidad Individual</span><span class="time">PDF</span></div>
+        <div class="row"><span>Plantilla de descarga mental</span><span class="time">PDF</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMUNIDAD ================= -->
+<section class="view" id="view-comunidad">
+  <span class="eyebrow">Co-sostenimiento</span>
+  <h1 class="title">Comunidad</h1>
+  <p class="sub">Un espacio para compartir experiencias y aprender en colectivo. No es otro canal de productividad.</p>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-head"><span>Comparte con la comunidad</span></div>
+    <textarea class="field-area" id="postInput" placeholder="¿Qué aprendiste o qué te está costando esta semana?"></textarea>
+    <div style="margin-top:10px"><button class="btn sm" id="postBtn">Publicar</button></div>
+  </div>
+  <div class="stack" id="posts"></div>
+</section>
+
+<!-- ================= NKI ================= -->
+<section class="view" id="view-nki">
+  <span class="eyebrow">Recopilar → estructurar → relacionar → detectar → sugerir → aprender</span>
+  <h1 class="title">Núcleo Kokón <strong>Intelligence</strong></h1>
+  <p class="sub">La IA amplifica el acompañamiento; no sustituye el criterio de la facilitadora ni el tuyo.</p>
+  <div class="grid-2">
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Patrón detectado</span></div>
+        <p style="font-size:13.5px;color:var(--mid)">En las últimas 2 semanas, tus tareas de mayor prioridad se completan con más frecuencia los días en que registraste 7+ horas de sueño.</p>
+        <p class="limits" style="margin-top:8px">Datos usados: hábitos, prioridades y check-ins (simulados en esta demo).</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Sugerencia de herramienta</span></div>
+        <p style="font-size:13.5px;color:var(--mid);margin-bottom:12px" id="nkiToolTxt">Detectamos dificultad recurrente para iniciar tareas de escritura. Podrías explorar <strong>Pomodoro</strong> como dispositivo de observación, no como obligación.</p>
+        <button class="btn sm" id="nkiUnlock">Desbloquear Pomodoro</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><span>Límites de la IA</span></div>
+        <p class="limits"><b>No</b> diagnostica enfermedades ni sustituye terapia, atención médica o criterio profesional. Las decisiones sobre tu vida siguen siendo tuyas.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span><span class="online"></span>Asistente Kokón</span><span class="right">Modo demo · respuestas simuladas</span></div>
+      <div class="chat">
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-quick" id="quick">
+          <button class="quick">Estoy muy cansada</button>
+          <button class="quick">No sé por dónde empezar</button>
+          <button class="quick">Tengo demasiados pendientes</button>
+        </div>
+        <form class="chat-form" id="chatForm">
+          <input id="chatIn" placeholder="Escribe aquí…" autocomplete="off">
+          <button class="btn sm" type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="disclaimer">Núcleo Kokón es una herramienta de acompañamiento y organización. No ofrece diagnóstico médico ni psicológico ni sustituye atención profesional. Si atraviesas una crisis, busca apoyo de un profesional de la salud o de una línea de ayuda de tu localidad.</p>
+
+</main>
+</div>
+</div>
+
+<div class="tour-bar" id="tourBar">
+  <div><div class="tour-step" id="tourStep"></div></div>
+  <div class="tour-cap" id="tourCap"></div>
+  <div class="tour-btns"><button class="tour-exit" id="tourExit">Salir</button><button class="tour-next" id="tourNext">Siguiente</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var $=function(s,c){return (c||document).querySelector(s)};
+  var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+  var esc=function(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML};
+
+  /* ---------- Toast ---------- */
+  var toastT;
+  function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2600)}
+
+  /* ---------- Navegación ---------- */
+  function go(view){
+    $$('.sb-link').forEach(function(l){l.classList.toggle('active',l.dataset.view===view)});
+    $$('.view').forEach(function(v){v.classList.toggle('active',v.id==='view-'+view)});
+    $('#sidebar').classList.remove('open');$('#overlay').classList.remove('show');
+    $('.content').scrollTo(0,0);window.scrollTo(0,0);
+    if(view==='progreso') renderProgress();
+  }
+  $$('.sb-link').forEach(function(l){l.addEventListener('click',function(){go(l.dataset.view)})});
+  $('#menuBtn').addEventListener('click',function(){$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('show')});
+  $('#overlay').addEventListener('click',function(){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show')});
+
+  /* ---------- Estado ---------- */
+  var state={
+    checkin:{corporal:null,emocional:null,energia:null},
+    prios:[
+      {t:'Terminar propuesta para Fundación X',d:false},
+      {t:'Llamar a Andrea para coordinar el webinar',d:false},
+      {t:'20 minutos de descanso sin pantallas',d:false}],
+    habits:[
+      {t:'Dormir 7+ horas',d:false,key:'sleep'},
+      {t:'Registro de gastos',d:false},
+      {t:'Pausa sin pantallas',d:false}],
+    base:{bio:42,seg:58,vin:66,ope:35,aut:70},
+    tools:{calendario:true,recordatorios:true,pomodoro:false,matriz:false,semanal:false,proyectos:false}
+  };
+
+  /* ---------- Semáforo ---------- */
+  function sem(v){
+    if(v<35) return {n:'Atención',c:'#B65B45',bg:'#F3E2DC'};
+    if(v<55) return {n:'Construcción',c:'#B9743F',bg:'#FBEEDF'};
+    if(v<75) return {n:'Sostenimiento',c:'#1A8C8A',bg:'#E8F4F4'};
+    return {n:'Autonomía',c:'#4A3340',bg:'#EDE2E8'};
+  }
+  function clamp(v){return Math.max(5,Math.min(98,v))}
+  function dims(){
+    var b=state.base,c=state.checkin;
+    var bio=b.bio+({bajo:-6,medio:0,alto:8}[c.energia]||0)+({tenso:-4,neutro:0,ligero:6}[c.corporal]||0)+(state.habits[0].d?6:0);
+    var vin=b.vin+({bajo:-4,medio:0,alto:5}[c.emocional]||0);
+    var done=state.prios.filter(function(p){return p.d}).length;
+    var hab=state.habits.filter(function(h){return h.d}).length;
+    var ope=b.ope+done*5+hab*2;
+    return [
+      {k:'bio',l:'Biológico',i:'🫁',v:clamp(bio)},
+      {k:'seg',l:'Seguridad',i:'🛡',v:clamp(b.seg)},
+      {k:'vin',l:'Vinculación',i:'🤝',v:clamp(vin)},
+      {k:'ope',l:'Operatividad',i:'🧠',v:clamp(ope)},
+      {k:'aut',l:'Autorrealización',i:'🚀',v:clamp(b.aut)}
+    ];
+  }
+
+  /* ---------- Check-in ---------- */
+  var ciMsgs={
+    low:'Gracias por registrarlo. Hoy conviene reducir, no sumar: elige una sola prioridad.',
+    mid:'Estás en un punto intermedio. Protege tus pausas y avanza con lo esencial.',
+    hi:'Buen punto de partida. Aprovecha para avanzar en lo que más impacto tiene.'
+  };
+  function updateCheckinMsg(){
+    var c=state.checkin;if(!c.corporal||!c.emocional||!c.energia){return}
+    var s=({bajo:0,medio:1,alto:2}[c.energia])+({bajo:0,medio:1,alto:2}[c.emocional])+({tenso:0,neutro:1,ligero:2}[c.corporal]);
+    $('#ciMsg').textContent=s<=2?ciMsgs.low:(s<=4?ciMsgs.mid:ciMsgs.hi);
+  }
+  $$('.ci-opts').forEach(function(g){
+    $$('.ci-opt',g).forEach(function(b){
+      b.addEventListener('click',function(){
+        $$('.ci-opt',g).forEach(function(x){x.classList.remove('selected')});
+        b.classList.add('selected');
+        state.checkin[g.dataset.g]=b.dataset.v;
+        updateCheckinMsg();renderReco();
+      });
+    });
+  });
+
+  /* ---------- Listas con check ---------- */
+  var tick='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  function renderChecks(){
+    $('#prioList').innerHTML=state.prios.map(function(p,i){
+      return '<div class="check-row'+(p.d?' done':'')+'" data-t="p" data-i="'+i+'"><span class="chk">'+tick+'</span><span class="lbl-t"><span class="prio-tag">P'+(i+1)+'</span>'+esc(p.t)+'</span></div>';
+    }).join('');
+    $('#habList').innerHTML=state.habits.map(function(h,i){
+      return '<div class="check-row'+(h.d?' done':'')+'" data-t="h" data-i="'+i+'"><span class="chk">'+tick+'</span><span class="lbl-t">'+esc(h.t)+'</span></div>';
+    }).join('');
+    $('#prioCount').textContent=state.prios.filter(function(p){return p.d}).length+' de 3';
+    $('#habCount').textContent=state.habits.filter(function(h){return h.d}).length+' de 3';
+  }
+  $('#view-hoy').addEventListener('click',function(e){
+    var r=e.target.closest('.check-row');if(!r)return;
+    var arr=r.dataset.t==='p'?state.prios:state.habits;
+    var it=arr[+r.dataset.i];it.d=!it.d;
+    renderChecks();renderReco();
+  });
+
+  /* ---------- Recomendación NK Intelligence (reglas simples MVP) ---------- */
+  function renderReco(){
+    var d=dims(),bio=d[0].v,ope=d[3].v,c=state.checkin,txt,why;
+    if(c.energia==='bajo'||c.corporal==='tenso'){
+      txt='Tu energía o tu cuerpo piden cuidado hoy. Antes de sumar una tarea nueva, protege una pausa y tu bloque de sueño esta noche.';
+      why='Regla aplicada: energía baja o cuerpo tenso → priorizar dimensión Biológica.';
+    }else if(bio<35){
+      txt='Tu dimensión Biológica sigue en atención. Una acción pequeña hoy: dormir 7+ horas y registrarlo como hábito.';
+      why='Regla aplicada: Índice Biológico < 35 → sugerir hábito de sueño.';
+    }else if(state.prios.every(function(p){return p.d})){
+      txt='Completaste tus tres prioridades. Es un buen momento para descansar sin culpa y cerrar el día.';
+      why='Regla aplicada: prioridades completas → recomendar cierre y descanso.';
+    }else if(ope<45){
+      txt='Tu agenda está cargada. Elige solo una prioridad para el siguiente bloque y deja el resto para después.';
+      why='Regla aplicada: Operatividad < 45 → sugerir reducir carga activa.';
+    }else{
+      txt='Vas encontrando tu ritmo. Mantén tus pausas y revisa al final del día qué sí funcionó.';
+      why='Regla aplicada: sin alertas activas → refuerzo de observación.';
+    }
+    $('#recoText').textContent=txt;$('#recoWhy').textContent=why+' (MVP: reglas simples; ML en fase posterior)';
+  }
+
+  /* ---------- Progreso: radar + semáforo ---------- */
+  function renderProgress(){
+    var data=dims(),n=data.length,cx=160,cy=148,R=100,out='';
+    var ang=function(i){return Math.PI*2*i/n-Math.PI/2};
+    var pt=function(i,r){return [cx+r*Math.cos(ang(i)),cy+r*Math.sin(ang(i))]};
+    [0.25,.5,.75,1].forEach(function(f){
+      out+='<polygon points="'+data.map(function(_,i){return pt(i,R*f).join(',')}).join(' ')+'" fill="none" stroke="rgba(107,79,90,0.16)" stroke-width="1"/>';
+    });
+    data.forEach(function(_,i){var p=pt(i,R);out+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="rgba(107,79,90,0.16)"/>'});
+    out+='<polygon points="'+data.map(function(d,i){return pt(i,d.v/100*R).join(',')}).join(' ')+'" fill="#1A8C8A" fill-opacity="0.30" stroke="#1A8C8A" stroke-width="2"/>';
+    data.forEach(function(d,i){var p=pt(i,d.v/100*R);out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4.5" fill="'+sem(d.v).c+'" stroke="#fff" stroke-width="1.5"/>'});
+    data.forEach(function(d,i){var p=pt(i,R+26);out+='<text x="'+p[0]+'" y="'+p[1]+'" text-anchor="middle" dominant-baseline="middle" font-size="10.5" font-family="Montserrat,sans-serif" fill="#4A3D40">'+d.l+'</text>'});
+    $('#radar').innerHTML=out;
+    $('#dimList').innerHTML=data.map(function(d){
+      var s=sem(d.v);
+      return '<div class="card dim"><span class="nm">'+d.i+' '+d.l+'</span><span><span class="val">'+d.v+'</span><span class="pill" style="background:'+s.bg+';color:'+s.c+'">'+s.n+'</span></span></div>';
+    }).join('');
+    var avg=Math.round(data.reduce(function(a,d){return a+d.v},0)/n);
+    $('#isNum').innerHTML=avg+'<small>/100</small>';
+  }
+
+  /* ---------- Bitácora ---------- */
+  $('#bitBtn').addEventListener('click',function(){
+    var v=$('#bitInput').value.trim();
+    if(!v){toast('Escribe algo para guardar en tu bitácora');return}
+    var el=document.createElement('div');el.className='tl-item';
+    el.innerHTML='<span class="tl-dot"></span><div class="card"><div class="tl-top"><span class="tl-tema">Reflexión propia</span><span class="tl-fecha">Hoy</span></div><p>'+esc(v)+'</p></div>';
+    $('#timeline').insertBefore(el,$('#timeline').firstChild);
+    $('#bitInput').value='';toast('Guardado en tu bitácora (solo en esta demo)');
+  });
+
+  /* ---------- Herramientas ---------- */
+  var toolDefs=[
+    {k:'calendario',n:'Calendario',c:'Dificultad para visualizar compromisos'},
+    {k:'recordatorios',n:'Recordatorios',c:'Descarga de carga mental'},
+    {k:'pomodoro',n:'Pomodoro',c:'Dificultad para iniciar tareas'},
+    {k:'matriz',n:'Matriz 20/80',c:'Exceso de actividades con poco impacto'},
+    {k:'semanal',n:'Planeación semanal',c:'Se habilita en Ciclo III · Estructurar'},
+    {k:'proyectos',n:'Gestión por proyectos',c:'Múltiples proyectos compitiendo'}
+  ];
+  var lockIc='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  var openIc='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
+  function renderTools(){
+    $('#toolGrid').innerHTML=toolDefs.map(function(t){
+      var u=state.tools[t.k];
+      return '<div class="card tool '+(u?'unlocked':'locked')+'"><div class="tool-name">'+t.n+'</div><div class="tool-crit">'+t.c+'</div>'+
+        (u?'<button class="btn sm" data-open="'+t.k+'">Abrir</button>':
+          (t.k==='semanal'?'<span class="plan-tag base">Ciclo III</span>':'<button class="btn ghost sm" data-unlock="'+t.k+'">Simular diagnóstico</button>'))+
+        '<span class="tool-ic">'+(u?openIc:lockIc)+'</span></div>';
+    }).join('');
+  }
+  function unlock(k){
+    if(state.tools[k])return;
+    state.tools[k]=true;renderTools();syncNki();
+    var nm=toolDefs.filter(function(t){return t.k===k})[0].n;
+    toast('Diagnóstico actualizado: se desbloqueó '+nm);
+  }
+  $('#toolGrid').addEventListener('click',function(e){
+    var u=e.target.closest('[data-unlock]'),o=e.target.closest('[data-open]');
+    if(u){unlock(u.dataset.unlock);return}
+    if(o){openTool(o.dataset.open)}
+  });
+
+  var pomo={t:1500,run:false,mode:'Enfoque',timer:null,sessions:0};
+  function fmt(s){var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x}
+  function openTool(k){
+    var p=$('#toolPanel'),html='';
+    if(k==='pomodoro'){
+      html='<div class="card panel"><div class="card-head"><span>Pomodoro · dispositivo experimental de observación</span></div>'+
+        '<div class="pomo-mode" id="pomoMode">'+pomo.mode+'</div><div class="pomo-time" id="pomoTime">'+fmt(pomo.t)+'</div>'+
+        '<div class="pomo-actions"><button class="btn sm" id="pomoGo">'+(pomo.run?'Pausar':'Iniciar')+'</button><button class="btn ghost sm" id="pomoReset">Reiniciar</button><button class="btn ghost sm" id="pomoDemo">Acelerar (demo)</button></div>'+
+        '<div class="pomo-log" id="pomoLog">Sesiones completadas: '+pomo.sessions+'. No es una obligación: observa cuánto sostienes la atención y cuándo aparece la fatiga.</div></div>';
+    }else if(k==='matriz'){
+      html='<div class="card panel"><div class="card-head"><span>Matriz 20/80 · ¿qué pocas acciones hacen la diferencia hoy?</span></div><div class="matrix">'+
+        '<div class="mx hi"><h4>Alto impacto · poco esfuerzo</h4>Terminar propuesta para Fundación X</div>'+
+        '<div class="mx"><h4>Alto impacto · mucho esfuerzo</h4>Rediseñar la oferta de servicios</div>'+
+        '<div class="mx"><h4>Bajo impacto · poco esfuerzo</h4>Responder correos no críticos</div>'+
+        '<div class="mx"><h4>Bajo impacto · mucho esfuerzo</h4>Reordenar archivos antiguos <em>(candidata a eliminar)</em></div></div></div>';
+    }else if(k==='calendario'){
+      html='<div class="card panel"><div class="card-head"><span>Calendario · mapa de realidad temporal</span></div><div class="cal-week">'+
+        '<div class="cal-day"><b>Lun</b><div class="cal-ev">Bloque propuesta</div><div class="cal-ev rest">Pausa corporal</div></div>'+
+        '<div class="cal-day"><b>Mar</b><div class="cal-ev">Webinar</div></div>'+
+        '<div class="cal-day"><b>Mié</b><div class="cal-ev">Cliente 11:00</div><div class="cal-ev rest">Descanso sin pantallas</div></div>'+
+        '<div class="cal-day"><b>Jue</b><div class="cal-ev">Mentoría</div></div>'+
+        '<div class="cal-day"><b>Vie</b><div class="cal-ev">Revisión semanal</div><div class="cal-ev rest">Tarde libre</div></div></div>'+
+        '<p class="limits" style="margin-top:10px">Primero se registran las obligaciones existentes; después se observa la capacidad real disponible.</p></div>';
+    }else if(k==='recordatorios'){
+      html='<div class="card panel"><div class="card-head"><span>Recordatorios · descarga de memoria</span></div>'+
+        '<div class="row"><span>Enviar factura a cliente</span><span class="time">Mañana 10:00</span></div>'+
+        '<div class="row"><span>Tomar agua y estirar</span><span class="time">Cada 2 h</span></div>'+
+        '<div class="row"><span>Preparar objetivos para mentoría</span><span class="time">Hoy 16:30</span></div></div>';
+    }else{
+      html='<div class="card panel"><p class="limits">Esta herramienta se mostrará en el MVP completo.</p></div>';
+    }
+    p.innerHTML=html;p.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(k==='pomodoro')bindPomo();
+  }
+  function pomoTick(){
+    pomo.t--;
+    if(pomo.t<=0){
+      clearInterval(pomo.timer);pomo.run=false;
+      if(pomo.mode==='Enfoque'){pomo.sessions++;pomo.mode='Pausa';pomo.t=300;toast('Sesión completada. Tómate 5 minutos.')}
+      else{pomo.mode='Enfoque';pomo.t=1500;toast('Pausa terminada.')}
+    }
+    drawPomo();
+  }
+  function drawPomo(){
+    var t=$('#pomoTime');if(!t)return;
+    t.textContent=fmt(pomo.t);$('#pomoMode').textContent=pomo.mode;$('#pomoGo').textContent=pomo.run?'Pausar':'Iniciar';
+    $('#pomoLog').textContent='Sesiones completadas: '+pomo.sessions+'. No es una obligación: observa cuánto sostienes la atención y cuándo aparece la fatiga.';
+  }
+  function bindPomo(){
+    $('#pomoGo').addEventListener('click',function(){
+      if(pomo.run){clearInterval(pomo.timer);pomo.run=false}
+      else{pomo.run=true;pomo.timer=setInterval(pomoTick,1000)}
+      drawPomo();
+    });
+    $('#pomoReset').addEventListener('click',function(){clearInterval(pomo.timer);pomo.run=false;pomo.mode='Enfoque';pomo.t=1500;drawPomo()});
+    $('#pomoDemo').addEventListener('click',function(){pomo.t=Math.min(pomo.t,4);drawPomo()});
+  }
+
+  /* ---------- Materiales ---------- */
+  var mats=[
+    {t:'Qué es la sostenibilidad humana',ty:'Video',c:'Bienestar',m:'12 min',p:'free'},
+    {t:'Mapa de tu semana real',ty:'PDF',c:'Gestión del tiempo',m:'Plantilla',p:'free'},
+    {t:'Pausas corporales de 5 minutos',ty:'Audio',c:'Bienestar',m:'8 min',p:'free'},
+    {t:'Masterclass: Priorizar sin culpa (20/80)',ty:'Video',c:'Gestión del tiempo',m:'48 min',p:'base'},
+    {t:'Fijar tarifas sin agotarte',ty:'Taller',c:'Freelance',m:'3 sesiones',p:'base'},
+    {t:'Cómo poner límites con clientes',ty:'Artículo',c:'Freelance',m:'10 min de lectura',p:'base'}
+  ];
+  var matCat='todos';
+  function renderMats(){
+    $('#matGrid').innerHTML=mats.filter(function(m){return matCat==='todos'||m.c===matCat}).map(function(m,i){
+      var lock=m.p==='base'&&state.plan==='free';
+      return '<div class="card mat'+(lock?' locked':'')+'"><div class="mat-type">'+m.ty+' · '+m.c+'</div><div class="mat-title">'+esc(m.t)+'</div><div class="mat-meta">'+m.m+'</div>'+
+        '<div class="mat-foot"><span class="plan-tag '+m.p+'">'+(m.p==='free'?'Gratis':'Plan Base')+'</span><button class="btn sm'+(lock?' ghost':'')+'" data-mat="'+(lock?'lock':'open')+'">'+(lock?'🔒 Suscribirme':'Ver')+'</button></div></div>';
+    }).join('');
+  }
+  state.plan='base';
+  $('#matChips').addEventListener('click',function(e){
+    var c=e.target.closest('.chip');if(!c)return;
+    $$('.chip').forEach(function(x){x.classList.remove('active')});c.classList.add('active');
+    matCat=c.dataset.c;renderMats();
+  });
+  $('#matGrid').addEventListener('click',function(e){
+    var b=e.target.closest('[data-mat]');if(!b)return;
+    toast(b.dataset.mat==='lock'?'Contenido del plan Base: aquí se conecta la pasarela de pago':'En producción se abre el reproductor integrado');
+  });
+  $('.plan-badge').style.cursor='pointer';
+  $('.plan-badge').title='Clic para simular plan gratuito / Base';
+  $('.plan-badge').addEventListener('click',function(){
+    state.plan=state.plan==='base'?'free':'base';
+    $('.plan-badge').textContent=state.plan==='base'?'Plan Base':'Plan Free';
+    renderMats();toast(state.plan==='base'?'Simulando plan Base: contenido desbloqueado':'Simulando plan Free: el contenido Base aparece bloqueado');
+  });
+
+  /* ---------- Acompañamiento ---------- */
+  $('#joinBtn').addEventListener('click',function(){toast('En producción: videollamada integrada (Jitsi o Zoom)')});
+
+  /* ---------- Comunidad ---------- */
+  var posts=[
+    {a:'M',n:'Mariana',w:'Hace 2 h',cat:'Experiencias',b:'Esta semana por primera vez cancelé una reunión que no era necesaria. Sentí culpa y alivio al mismo tiempo.',l:14,c:5,on:false},
+    {a:'D',n:'Daniela',w:'Ayer',cat:'Preguntas',b:'¿Cómo manejan los días de baja energía cuando hay entregas? Estoy probando bloques de 25 minutos.',l:9,c:8,on:false}
+  ];
+  function renderPosts(){
+    $('#posts').innerHTML=posts.map(function(p,i){
+      return '<div class="card"><div class="post-head"><div class="post-av">'+esc(p.a)+'</div><div><div class="post-who">'+esc(p.n)+'</div><div class="post-when">'+p.w+'</div></div><span class="cat-tag">'+p.cat+'</span></div>'+
+        '<div class="post-body">'+esc(p.b)+'</div><div class="post-actions"><button data-like="'+i+'" class="'+(p.on?'on':'')+'">'+(p.on?'💚':'🤍')+' '+p.l+'</button><button data-cm="'+i+'">💬 '+p.c+'</button><button data-rp="'+i+'">Reportar</button></div></div>';
+    }).join('');
+  }
+  $('#posts').addEventListener('click',function(e){
+    var l=e.target.closest('[data-like]'),c=e.target.closest('[data-cm]'),r=e.target.closest('[data-rp]');
+    if(l){var p=posts[+l.dataset.like];p.on=!p.on;p.l+=p.on?1:-1;renderPosts()}
+    if(c){toast('Hilo de comentarios: disponible en el MVP completo')}
+    if(r){toast('Reporte enviado a moderación')}
+  });
+  $('#postBtn').addEventListener('click',function(){
+    var v=$('#postInput').value.trim();
+    if(!v){toast('Escribe algo para publicar');return}
+    posts.unshift({a:'R',n:'Renata',w:'Ahora',cat:'Experiencias',b:v,l:0,c:0,on:false});
+    $('#postInput').value='';renderPosts();toast('Publicado (solo en esta demo)');
+  });
+
+  /* ---------- NK Intelligence: chat simulado con reglas ---------- */
+  function say(txt,who){
+    var d=document.createElement('div');d.className='msg '+who;d.textContent=txt;
+    $('#chatLog').appendChild(d);$('#chatLog').scrollTop=1e6;
+  }
+  var crisis=/(quitarme la vida|suicid|hacerme da[nñ]o|no quiero vivir|morirme)/i;
+  function reply(t){
+    if(crisis.test(t)) return 'Lo que cuentas es importante y mereces apoyo humano ahora. Por favor contacta a una persona de confianza o a un servicio de emergencia o línea de ayuda de tu localidad. No estás sola. Soy una herramienta de acompañamiento y no puedo sustituir atención profesional.';
+    if(/cansad|agotad|sue[nñ]o|dorm|energ/i.test(t)) return 'Gracias por decirlo. Cuando el cuerpo está cansado, empezar por lo biológico suele ayudar más que sumar tareas. ¿Qué es lo mínimo que podrías soltar hoy? Si quieres, lo llevamos a tu próxima sesión de mentoría.';
+    if(/empezar|iniciar|procrastin|arrancar/i.test(t)) return 'Es frecuente cuando una tarea está mal definida. Prueba definirla en un primer paso de 10 minutos. Si te sirve, puedo sugerirte Pomodoro como experimento de observación, no como obligación.';
+    if(/pendiente|demasiad|saturad|abrum|tarea/i.test(t)) return 'Anota todo lo que tienes en la cabeza (descarga mental) y luego elige solo 1 prioridad que mueva la aguja hoy. El resto puede esperar, delegarse o eliminarse. ¿Quieres que te muestre la Matriz 20/80?';
+    if(/h[aá]bito|rutina|constan/i.test(t)) return 'Mejor un hábito pequeño y sostenible que cinco ambiciosos. Empieza por uno biológico, como el sueño, y revisa en una semana si reduce carga o la aumenta.';
+    return 'Te escucho. Cuéntame un poco más: ¿es algo del cuerpo, de la agenda o de las relaciones? Así puedo orientarte hacia la herramienta adecuada. La decisión final siempre es tuya.';
+  }
+  function send(t){
+    say(t,'user');
+    setTimeout(function(){say(reply(t),'bot')},600);
+  }
+  $('#chatForm').addEventListener('submit',function(e){
+    e.preventDefault();var v=$('#chatIn').value.trim();if(!v)return;$('#chatIn').value='';send(v);
+  });
+  $('#quick').addEventListener('click',function(e){var q=e.target.closest('.quick');if(q)send(q.textContent)});
+  say('Hola. Soy tu asistente Kokón. Puedo acompañarte a ordenar lo que sientes, pensar una decisión o ayudarte a elegir una herramienta. ¿Por dónde te gustaría empezar?','bot');
+
+  function syncNki(){
+    if(state.tools.pomodoro){
+      $('#nkiToolTxt').innerHTML='<strong>Pomodoro</strong> ya está desbloqueado. Úsalo como experimento: observa cuánto tiempo sostienes la atención y cuándo aparece la fatiga.';
+      $('#nkiUnlock').textContent='Abrir Pomodoro';
+    }
+  }
+  $('#nkiUnlock').addEventListener('click',function(){
+    if(!state.tools.pomodoro)unlock('pomodoro');
+    go('herramientas');openTool('pomodoro');
+  });
+
+  /* ---------- Recorrido demo (90 s) ---------- */
+  var steps=[
+    {v:'hoy',c:'Gancho: "No solo organizamos procesos: cuidamos la vida que los sostiene." Aquí la usuaria hace su check-in diario.'},
+    {v:'hoy',c:'La app propone solo lo esencial del día y NK Intelligence recomienda según cómo llega la persona (reglas simples en el MVP).'},
+    {v:'progreso',c:'El Índice de Sostenibilidad no es una racha: es la evolución del sistema por dimensión (Maslow Operativo).'},
+    {v:'herramientas',c:'Andamiaje adaptativo: las herramientas se desbloquean según el diagnóstico, no todas desde el día uno.'},
+    {v:'nki',c:'NK Intelligence detecta patrones y sugiere. Nunca diagnostica ni sustituye el criterio de la persona.'},
+    {v:'acompanamiento',c:'Acompañamiento humano + tecnología: la facilitadora recibe contexto y la usuaria conserva el control.'}
+  ];
+  var ti=-1;
+  function tourShow(){
+    var s=steps[ti];go(s.v);
+    $('#tourStep').textContent='Paso '+(ti+1)+' de '+steps.length;
+    $('#tourCap').textContent=s.c;
+    $('#tourNext').textContent=ti===steps.length-1?'Finalizar':'Siguiente';
+    $('#tourBar').classList.add('show');
+  }
+  function tourEnd(){ti=-1;$('#tourBar').classList.remove('show');go('hoy')}
+  $('#tourBtn').addEventListener('click',function(){ti=0;tourShow()});
+  $('#tourNext').addEventListener('click',function(){if(ti>=steps.length-1){tourEnd();return}ti++;tourShow()});
+  $('#tourExit').addEventListener('click',tourEnd);
+
+  /* ---------- Init ---------- */
+  renderChecks();renderReco();renderTools();renderMats();renderPosts();renderProgress();
+})();
+</script>
+</body>
+</html>
